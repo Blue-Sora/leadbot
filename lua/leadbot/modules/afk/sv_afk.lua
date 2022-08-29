@@ -26,6 +26,8 @@ hook.Add("PlayerTick", "LeadBot_AFK", function(ply)
 end)
 
 function LeadBot.Botize(ply, togg)
+    if (CLIENT) then return end
+
     if togg == nil then togg = !ply.LeadBot end
 
     if ((!togg and ply:IsLBot()) or (togg and !ply:IsLBot())) and LeadBot.SuicideAFK and ply:Alive() then
@@ -33,14 +35,21 @@ function LeadBot.Botize(ply, togg)
     end
 
     if !togg then
+        PrintMessage(HUD_PRINTTALK, "LeadBot: "..ply:Name().." is no longer AFK.")
+
         ply:SetNWBool("LeadBot_AFK", false)
         ply.LeadBot = false
-        if IsValid(ply.ControllerBot) then
+        if (IsValid(ply.ControllerBot)) then
             ply.ControllerBot:Remove()
         end
         ply.LastSegmented = CurTime()
         ply.CurSegment = 2
+
+
+        LeadBot.OnAFK(ply)
     else
+        PrintMessage(HUD_PRINTTALK, "LeadBot: "..ply:Name().." is now AFK. A bot took over their controller.")
+
         ply:SetNWBool("LeadBot_AFK", true)
         ply.LeadBot = true
         ply.BotColor = ply:GetPlayerColor()
@@ -61,6 +70,8 @@ function LeadBot.Botize(ply, togg)
         ply.LeadBot_Config[2] = ply.BotColor
         ply.LeadBot_Config[3] = ply.BotWColor
         ply.LeadBot_Config[4] = ply.BotStrategy
+
+        LeadBot.OnLeaveAFK(ply)
     end
 end
 
