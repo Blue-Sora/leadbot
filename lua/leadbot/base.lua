@@ -29,7 +29,7 @@ CreateConVar("leadbot_keepWeapon", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Forces y
 CreateConVar("leadbot_move", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from moving and shooting, they'll still think.")
 CreateConVar("leadbot_chat", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from talking in chat. (Note: Disabling this will make them to also not be able to ask for help from their team or let them know about something if the gamemode you're playing has to do with teams.)")
 
-concommand.Add("thiagobot_tp", 
+concommand.Add("leadbot_tp", 
 function(ply, _, args)
     --local tppos = player.GetByID(1):GetPos()
     --local remembpos = player.GetByID(1):GetPos()
@@ -59,7 +59,7 @@ end
 , 
 nil, "Teleports all bots into your position.")
 
-concommand.Add("thiagobot_separatebyteams", 
+concommand.Add("leadbot_separatebyteams", 
 function(ply, _, args)
 
     local team_amount = 2
@@ -103,7 +103,7 @@ end
 , 
 nil, "Test/experimental. Create teams for each players to 2 teams against each other.")
 
-concommand.Add("thiagobot_movetome", 
+concommand.Add("leadbot_movetome", 
 function(ply, _, args)
     local tppos = player.GetByID(1):GetPos()
     local teamindex = tonumber(args[1])
@@ -127,7 +127,7 @@ end
 , 
 nil, "Teleports all bots into your position.")
 
-concommand.Add("thiagobot_test", 
+concommand.Add("leadbot_test", 
 function(ply, _, args)
 
     PrintTable(ents.GetAll())
@@ -139,7 +139,7 @@ end
 , 
 nil, "Test function for when I was developing.")
 
-concommand.Add("thiagobot_test2", 
+concommand.Add("leadbot_test2", 
 function(ply, _, args)
 
     local ActiveWeapon = ply:GetActiveWeapon()
