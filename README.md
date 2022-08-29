@@ -47,6 +47,7 @@ This fork adds:
  - leadbot_tp (Teleports all the Leadbot bots near your position)
  - leadbot_test (Experimental/Testing/Debugging when working with the bots. It was intended to list all entities running in the game for when I was coding.)
  - leadbot_test2 (Experimental/Testing/Debugging when working with the bots. It was intended to show which type of weapon is the one you're holding, like ar2, shotguns, pistol, grenades, knife, etc. to let me know some weapons hold type.)
+  - leadbot_separatebyteams (Experimental/Fun when I was trying to work on teams. I'd highly recommend https://steamcommunity.com/sharedfiles/filedetails/?id=2311549692 now though if you wish to do team battles with them.)
+  
  ### Issues
- - leadbot_separatebyteams (Experimental/Fun when I was trying to work on teams. I'd highly recommend https://steamcommunity.com/sharedfiles/filedetails/?id=2311549692 now though if you wish to do team battles with them.)
 You can submit issues on the [Discord](https://discord.gg/PJByEaPgTq) or through [issues](https://github.com/LeadKiller/leadbot/issues)
