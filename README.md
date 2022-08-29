@@ -25,6 +25,7 @@ Download LeadBot from [here](https://github.com/LeadKiller/leadbot/archive/maste
  
  This fork adds:
  - [Five Nights at Freddy's](https://steamcommunity.com/sharedfiles/filedetails/?id=408243366) (Still being worked on)
+ - [Alien: Isolation](https://steamcommunity.com/sharedfiles/filedetails/?id=473858472) (Still being worked on)
 ### Commands/Convars
  - leadbot_add [1-128]
  - leadbot_afk
