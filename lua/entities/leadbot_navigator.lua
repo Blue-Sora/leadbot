@@ -27,9 +27,101 @@ function ENT:Initialize()
 	self.strafeAngle = 0
 	self.nextStuckJump = 0
 
+	-- Looking/aiming
+	self.nextRandomLook = 1 -- Timer for the next randomized direction to look at.
+	self.isLookingToDirection = false -- Boolean, when it supposed to be looking at a certain direction, if not then it'll be looking where it is moving to.
+	self.lookAngle = Angle(0, 0, 0) -- Angle to where it is looking at.
+	self.stopLookingTimer = 0 -- Timer till it stops looking into that randomized direction.
+
+	self.aimExtraAngle = Angle(0, 0, 0)
+
+	-- Random extra values for the aiming (Intended to make it more reallistic just like as a real player, similar to Counter-Strike: Source.)
+	self.lookAngleExtra = Angle(0, 0, 0) -- Extra angle that increases lookAngle variable.
+	self.lookAngleExtraSin = 0 -- Used to make a smooth very tiny move of the camera for more realism, notable when it's not moving that much.
+	self.lookAngleExtraSinDifference = 0 -- Not really much important, it just makes it have a difference sin value by increasing the value above to make a difference between other players cuz' I'm dumb.
+
+	-- Walking
+	self.walkFast = true -- Boolean, if true the bot will walk fast, otherwise false, not walk fast (sprint).
+	self.nextWalkNormal = CurTime() + 1 -- Timer for the next walk normal to stop walking/spriting fast.
+	self.walkNormalTimer = 0 -- Timer till it stops walking normally and then sprints again.
+	self.movingAngle = Angle(0, 0, 0)
+
+	-- Weapons
+	self.nextWeaponSwitch = CurTime() + 0.1
+	self.defaultMeleeWeapon = "weapon_pistol"
+	self.holdingWeapon = self.defaultMeleeWeapon
+	self.forceWeaponChange = true
+
+	-- Melees
+	self.defaultMeleeWeapon = "weapon_crowbar"
+
+	-- View position
+	self.viewVpos = 40
+
+	-- Target
+	self.isTargettable = true
+
+
+	self:CReset()
+
 	if LeadBot.AddControllerOverride then
 		LeadBot.AddControllerOverride(self)
 	end
+end
+
+function ENT:CReset()
+	-- Weapons
+	self.nextWeaponSwitch = CurTime() + 0.1
+	
+	-- Battle behaviours
+	self.battle_behaviourType = 0
+	self.battle_nextBehaviourTime = CurTime() + 0.1
+
+	-- Boolean
+	self.canSeeTarget = false
+	self.IGuessWeAreAiming = false
+
+	-- Targetting
+	self.target_timeToRealize = 0 -- This is the timer that takes the bot to realize that there might be an enemy right on our front and target them.
+	self.target_timeToAim = 0 -- Timer that it takes to aim at the direction it saw the enemy when it weren't targetted and aimed before.
+	self.Target = nil
+	self.IgnoreTarget = false -- Boolean, should we ignore our attack even though we have it?
+
+	-- Enemies
+	self.lastSeenEnemiesPos = {}
+
+	-- Counter
+	self.FrameCounter = 0
+
+	-- Following
+	self.followingPlayer = nil
+
+	-- Sniper
+	self.sniper_preparingForNextShotTime = 0
+
+
+	------------------------------------------------------------------
+	-- Specific Weapons
+	------------------------------------------------------------------	
+
+	-- Physgun
+	self.Physgun_TargetProp = nil -- Current prop that we wanna get
+	self.Physgun_NextLookForProp = 0 -- Timer to look for near props to get so it doesn't have to do this every frame.
+	self.Physgun_TargetPropGiveUpTimer = 0 -- Timer till it gives up after finding one and trying to get it
+
+	return true
+end
+
+function ENT:CSetTarget(target)
+
+
+	self.Target = target
+	self.ForgetTarget = CurTime() + 2
+end
+
+function ENT:CSetGoal(goalvec)
+	self.PosGen = goalvec
+	self.LastSegmented = CurTime() + 6
 end
 
 function ENT:ChasePos()
@@ -111,7 +203,34 @@ function ENT:CanSee(ply, fov)
 
 	-- TODO: we really should check worldspacecenter too
 	local owner = self:GetOwner()
-	return util.QuickTrace(owner:EyePos(), ply:EyePos() - owner:EyePos(), {owner, self}).Entity == ply
+
+	local p1v = ply:EyePos() + Vector( 0, 0, 24 )
+	local p2v = owner:EyePos() + Vector( 0, 0, 24 )
+
+	--local dist = self.viewVpos
+
+	--p2v.z = p2v.z + dist
+	--p1v.z = p1v.z + dist
+
+	local line = util.TraceLine( { start = p1v, endpos = p2v, filter = {ply}, mask = MASK_SOLID } )
+
+	--[[
+	local targets = nil
+
+	for _, v in pairs(ents.FindInSphere(line.HitPos, 10000)) do
+		if (v:IsPlayer()) then
+			targets = v
+
+			return true
+		end
+	end
+
+	--]]
+
+	return !line.Hit
+
+	--return util.QuickTrace(p2v, p1v - p2v, {owner, self}).Entity == ply
+	--return util.QuickTrace(owner:EyePos(), ply:EyePos() - owner:EyePos(), {owner, self}).Entity == ply
 end
 
 function ENT:RunBehaviour()
