@@ -36,7 +36,9 @@ function(ply, _, args)
     local tppos = ply:GetPos()
     local remembpos = ply:GetPos()
 
-    local random = true
+    local random = args[1]
+    if !random then random = 1 else random = 0 end
+
     local dist = 20
 
     print(tppos)
@@ -45,7 +47,7 @@ function(ply, _, args)
         if (ply:IsLBot()) then
 
             
-            if ( random ) then
+            if ( random == 1 ) then
                 tppos.x = remembpos.x + dist + math.random(-150, 150)
                 tppos.y = remembpos.y + dist + math.random(-150, 150)
             end
@@ -150,6 +152,25 @@ function(ply, _, args)
     print("Player '".. ply:Name() .."' hold weapon type: "..HoldType)
 
     return
+end
+, 
+nil, "Test function for when I was developing.")
+
+concommand.Add("leadbot_test3", 
+function(ply, _, args)
+
+
+
+    if (args[1]) then
+        local bot = player.GetByID(args[1])
+
+        local ActiveWeapon = bot:GetActiveWeapon()
+
+        local HoldType = ActiveWeapon:GetHoldType()
+
+        print(ActiveWeapon)
+        print("Player '".. bot:Name() .."' hold weapon type: "..HoldType)
+    end
 end
 , 
 nil, "Test function for when I was developing.")
@@ -1378,7 +1399,7 @@ function GetIsMelee(wp)
 end
 
 function BotSay(ply, msg, onlyTeam)
-    if (!GetConVar("thiagobot_chat"):GetBool()) then return end
+    if (!GetConVar("leadbot_chat"):GetBool()) then return end
     if (onlyTeam == nil) then onlyTeam = true end
 
 
@@ -1389,6 +1410,13 @@ end
 function BotSwitchWeapons(ply, wp)
 
 
+end
+
+function LeadBot.OnReset(ply)
+end
+function LeadBot.OnAFK(ply)
+end
+function LeadBot.OnLeaveAFK(ply)
 end
 
 --[[ HOOKS ]]--
