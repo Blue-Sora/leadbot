@@ -34,6 +34,8 @@ Download LeadBot from [here](https://github.com/LeadKiller/leadbot/archive/maste
  - leadbot_names _[name1,name2]_
  - leadbot_voice _[voiceset]_
  - leadbot_fov _[75-100]_
+ 
+This fork adds:
  - leadbot_stop _[0/1]_ (Bots stops thinking.)
  - leadbot_move _[0/1]_ (Bots won't move and shoot but will still think.)
  - leadbot_weapons _[weapons name]_ (Inserts each weapon name per comma for the bots to select randomly between them. (Ex.:leadbot_weapons 'weapon_crowbar,weapon_pistol,weapon_ar2,weapon_frag'))
