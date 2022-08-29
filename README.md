@@ -22,6 +22,9 @@ Download LeadBot from [here](https://github.com/LeadKiller/leadbot/archive/maste
  - [Quake 3](https://steamcommunity.com/sharedfiles/filedetails/?id=160207505)
  - [Slayer](https://steamcommunity.com/sharedfiles/filedetails/?id=1336605119)
  - [Other Gamemodes](https://github.com/LeadKiller/leadbot/projects/1)
+ 
+ This fork adds:
+ - [Five Nights at Freddy's](https://steamcommunity.com/sharedfiles/filedetails/?id=408243366) (Still being worked on)
 ### Commands/Convars
  - leadbot_add [1-128]
  - leadbot_afk
