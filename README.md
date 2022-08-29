@@ -39,6 +39,7 @@ Download LeadBot from [here](https://github.com/LeadKiller/leadbot/archive/maste
  - leadbot_fov _[75-100]_
  
 This fork adds:
+( Note: some of the convars will only work on Sandbox, unless if the gamemode was made by me! Futurely might work on some gamemodes made by the LeadBot creators. )
  - leadbot_stop _[0/1]_ (Bots stops thinking.)
  - leadbot_move _[0/1]_ (Bots won't move and shoot but will still think.)
  - leadbot_weapons _[weapons name]_ (Inserts each weapon name per comma for the bots to select randomly between them. (Ex.:leadbot_weapons 'weapon_crowbar,weapon_pistol,weapon_ar2,weapon_frag'))
@@ -47,4 +48,5 @@ This fork adds:
  - leadbot_test (Experimental/Testing/Debugging when working with the bots. It was intended to list all entities running in the game for when I was coding.)
  - leadbot_test2 (Experimental/Testing/Debugging when working with the bots. It was intended to show which type of weapon is the one you're holding, like ar2, shotguns, pistol, grenades, knife, etc. to let me know some weapons hold type.)
  ### Issues
+ - leadbot_separatebyteams (Experimental/Fun when I was trying to work on teams. I'd highly recommend https://steamcommunity.com/sharedfiles/filedetails/?id=2311549692 now though if you wish to do team battles with them.)
 You can submit issues on the [Discord](https://discord.gg/PJByEaPgTq) or through [issues](https://github.com/LeadKiller/leadbot/issues)
