@@ -44,7 +44,7 @@ This fork adds:
  - leadbot_move _[0/1]_ (Bots won't move and shoot but will still think.)
  - leadbot_weapons _[weapons name]_ (Inserts each weapon name per comma for the bots to select randomly between them. (Ex.:leadbot_weapons 'weapon_crowbar,weapon_pistol,weapon_ar2,weapon_frag'))
  - leadbot_forceWeapon _[0/1]_ (Force bots to keep a weapon that you was holding if you went AFK) (NOTE:This was experimental and still not working as it should.)
- - leadbot_tp (Teleports all the Leadbot bots near your position)
+ - leadbot_tp _[1 = Teleports them into your exact pos, 0 = Teleports them near you with a couple of distance]_ (Teleports all the Leadbot bots near your position) (Ex.: leadbot_tp 1)
  - leadbot_test (Experimental/Testing/Debugging when working with the bots. It was intended to list all entities running in the game for when I was coding.)
  - leadbot_test2 (Experimental/Testing/Debugging when working with the bots. It was intended to show which type of weapon is the one you're holding, like ar2, shotguns, pistol, grenades, knife, etc. to let me know some weapons hold type.)
   - leadbot_separatebyteams (Experimental/Fun when I was trying to work on teams. I'd highly recommend https://steamcommunity.com/sharedfiles/filedetails/?id=2311549692 now though if you wish to do team battles with them.)
