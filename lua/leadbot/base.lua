@@ -22,12 +22,12 @@ CreateConVar("leadbot_models", "", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot models, s
 CreateConVar("leadbot_name_prefix", "", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot name prefix")
 CreateConVar("leadbot_fov", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "LeadBot FOV\nSet to 0 to use the preset FOV.")
 
-concommand.Add("thiagobot_kill", function(ply, _, args) if !args[1] or IsValid(ply) and !ply:IsSuperAdmin() then return end if args[1] ~= "all" then for k, v in pairs(player.GetBots()) do if string.find(v:GetName(), args[1]) then v:Kill() return end end else for k, v in pairs(player.GetBots()) do v:Kill() end end end, nil, "Kill LeadBots (all is avaliable!)")
-CreateConVar("thiagobot_stop", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stop bots from moving and thinking.")
-CreateConVar("thiagobot_weapons", "_hl2", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot weapons able to use, seperated by commas. You can also leave it default with '_hl2' to make them select Half-life 2 weapons by default.")
-CreateConVar("thiagobot_keepWeapon", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Forces your (and other net players) bot to keep a specified weapon without changing it to another. (Experimental)")
-CreateConVar("thiagobot_move", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from moving and shooting, they'll still think.")
-CreateConVar("thiagobot_chat", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from talking in chat. (Note: Disabling this will make them to also not be able to ask for help from their team or let them know about something if the gamemode you're playing has to do with teams.)")
+concommand.Add("leadbot_kill", function(ply, _, args) if !args[1] or IsValid(ply) and !ply:IsSuperAdmin() then return end if args[1] ~= "all" then for k, v in pairs(player.GetBots()) do if string.find(v:GetName(), args[1]) then v:Kill() return end end else for k, v in pairs(player.GetBots()) do v:Kill() end end end, nil, "Kill LeadBots (all is avaliable!)")
+CreateConVar("leadbot_stop", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stop bots from moving and thinking.")
+CreateConVar("leadbot_weapons", "_hl2", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot weapons able to use, seperated by commas. You can also leave it default with '_hl2' to make them select Half-life 2 weapons by default.")
+CreateConVar("leadbot_keepWeapon", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Forces your (and other net players) bot to keep a specified weapon without changing it to another. (Experimental)")
+CreateConVar("leadbot_move", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from moving and shooting, they'll still think.")
+CreateConVar("leadbot_chat", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from talking in chat. (Note: Disabling this will make them to also not be able to ask for help from their team or let them know about something if the gamemode you're playing has to do with teams.)")
 
 concommand.Add("thiagobot_tp", 
 function(ply, _, args)
@@ -501,14 +501,14 @@ function LeadBot.StartCommand(bot, cmd)
 
     local weaponUpdate = false
 
-    local botweapons = GetConVar("thiagobot_weapons"):GetString()
+    local botweapons = GetConVar("leadbot_weapons"):GetString()
 
-    local shouldmove = GetConVar("thiagobot_move"):GetBool()
+    local shouldmove = GetConVar("leadbot_move"):GetBool()
 
     if !IsValid(controller) then return end
 
 
-    if (GetConVar("thiagobot_stop"):GetBool() or !bot:Alive()) then
+    if (GetConVar("leadbot_stop"):GetBool() or !bot:Alive()) then
         cmd:ClearButtons()
         cmd:ClearMovement()
         return
@@ -871,7 +871,7 @@ function LeadBot.StartCommand(bot, cmd)
         local oldwp
 
         if (!bot:IsBot()) then
-            if (GetConVar("thiagobot_keepWeapon"):GetBool()) then
+            if (GetConVar("leadbot_keepWeapon"):GetBool()) then
                 keep = true
                 oldwp = bot:GetActiveWeapon()
             end
@@ -903,8 +903,8 @@ function LeadBot.StartCommand(bot, cmd)
 end
 
 function LeadBot.PlayerMove(bot, cmd, mv)
-    local shouldthink = !GetConVar("thiagobot_stop"):GetBool()
-    local shouldmove = GetConVar("thiagobot_move"):GetBool()
+    local shouldthink = !GetConVar("leadbot_stop"):GetBool()
+    local shouldmove = GetConVar("leadbot_move"):GetBool()
 
     if (!shouldthink) then 
         return 
