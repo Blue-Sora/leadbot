@@ -159,6 +159,10 @@ function ENT:Health()
 	return nil
 end
 
+function ENT:OnRemove()
+
+end
+
 -- remade this in lua so we can finally ignore the controller's bot
 -- for some reason it's not really possible to overwrite IsAbleToSee
 local function PointWithinViewAngle(pos, targetpos, lookdir, fov)
