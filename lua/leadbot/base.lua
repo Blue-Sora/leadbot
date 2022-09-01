@@ -28,6 +28,11 @@ CreateConVar("leadbot_weapons", "_hl2", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot weap
 CreateConVar("leadbot_keepWeapon", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Forces your (and other net players) bot to keep a specified weapon without changing it to another. (Experimental)")
 CreateConVar("leadbot_move", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from moving and shooting, they'll still think.")
 CreateConVar("leadbot_chat", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from talking in chat. (Note: Disabling this will make them to also not be able to ask for help from their team or let them know about something if the gamemode you're playing has to do with teams.)")
+CreateConVar("leadbot_testcrazy", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "This was just a kinda of fun testing. Makes all bots go crazy into directions and shooting.\n(Reason: I've made this because I wanted to make the bots shoot randomly with the Nyan cat gun because yes.)")
+CreateConVar("leadbot_targetting", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Way of targetting of the bots.\n0 = Targets only players.\n1 = Targets players and NPCs (Note: Makes the game not run in a good perfomance if there's a lot of bots running.)")
+CreateConVar("leadbot_viewRange", "2250000", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "(Default: 2250000) NOTE: This only works if the ConVar 'leadbot_targetting' is set to 0.\nRange for bots to detect and see enemies on their way in their FOV.")
+CreateConVar("leadbot_viewRangeSphere", "1020", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "(Default: 1020) NOTE: This only works if the ConVar 'leadbot_targetting' is set to 1.\nRange for bots to detect and see enemies on their way in their FOV inside a sphere of this range value.\nNOTE: Higher range values might cause a big hit on performance.")
+CreateConVar("leadbot_displayAfkMessage", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Display if a player is currently AFK and controlled by a bot on top of their head.")
 
 concommand.Add("leadbot_tp", 
 function(ply, _, args)
@@ -361,7 +366,10 @@ function LeadBot.AddBot()
             local i = 0
             while name == "" do
                 i = i + 1
-                local str = player_manager.TranslateToPlayerModelName(table.Random(player_manager.AllValidModels()))
+                if GetConVar("leadbot_models"):GetString() == ""  then
+                    local str = player_manager.TranslateToPlayerModelName(table.Random(player_manager.AllValidModels()))
+                end
+
                 for _, ply in pairs(player.GetBots()) do
                     if ply.OriginalName == str or string.lower(ply:Nick()) == str or name_Default[str] and ply:Nick() == name_Default[str] then
                         str = ""
@@ -390,6 +398,11 @@ function LeadBot.AddBot()
         generated = name_Generated
     end
 
+    if GetConVar("leadbot_models"):GetString() ~= "" then
+
+        model = table.Random(string.Split(GetConVar("leadbot_models"):GetString(), ","))
+    end
+
     if LeadBot.PlayerColor == "default" then
         generated = "Kleiner"
     end
@@ -411,9 +424,12 @@ function LeadBot.AddBot()
     if LeadBot.PlayerColor ~= "default" then
         if model == "" then
             if GetConVar("leadbot_models"):GetString() ~= "" then
+
                 model = table.Random(string.Split(GetConVar("leadbot_models"):GetString(), ","))
+                --model = player_manager.AllValidModels()[ table.Random(string.Split(GetConVar("leadbot_models"):GetString(), ",")) ]
             else
                 model = player_manager.TranslateToPlayerModelName(table.Random(player_manager.AllValidModels()))
+                bot:SetName(model)
             end
         end
 
@@ -528,8 +544,8 @@ function LeadBot.StartCommand(bot, cmd)
 
     if !IsValid(controller) then return end
 
-
-    if (GetConVar("leadbot_stop"):GetBool() or !bot:Alive()) then
+    --if (GetConVar("leadbot_stop"):GetBool() or !bot:Alive() or bot:IsFlagSet(FL_FROZEN)) then
+    if (GetConVar("leadbot_stop"):GetBool() or !bot:Alive() or bot:IsFlagSet(FL_FROZEN)) then
         cmd:ClearButtons()
         cmd:ClearMovement()
         return
@@ -677,14 +693,21 @@ function LeadBot.StartCommand(bot, cmd)
                 local prop = controller.Physgun_TargetProp
                 if (IsValid(prop)) then
                     if (prop:IsPlayerHolding()) then
-                        local plytarget = util.TraceLine( { start = bot:EyePos(), endpos = target:EyePos(), filter = {prop, target}, mask = MASK_SOLID } )
+                       -- local plytarget = util.TraceLine( { start = bot:EyePos(), endpos = target:EyePos(), filter = {prop, target}, mask = MASK_SOLID } )
 
 
-                        if (controller:CanSee(target, true) and !plytarget.Hit) then
+                       -- and !plytarget.Hit
+                        if (controller:CanSee(target, true)) then
                             buttons = buttons + IN_ATTACK
                         end
                     end
                 end
+            end
+
+
+            -- Random jumps
+            if (math.random(1, 95) == 31) then
+                buttons = buttons + IN_JUMP
             end
         else -- Melees
 
@@ -847,7 +870,7 @@ function LeadBot.StartCommand(bot, cmd)
 
     if (botweapons == "_hl2") then
         botweapons = "weapon_smg1,weapon_357,weapon_shotgun,weapon_pistol,weapon_crossbow,weapon_ar2,weapon_frag"
-        --botweapons = "weapon_p228,weapon_m4a1,weapon_smokegrenade,weapon_m3,weapon_xm1014,weapon_m249,weapon_awp,weapon_mp5navy,weapon_ump45,weapon_sg550,weapon_tmp,weapon_deagle,weapon_scout,weapon_sg552,weapon_usp,weapon_mac10,weapon_galil,weapon_hegrenade,weapon_flashbang,weapon_fiveseven,weapon_p90,weapon_g3sg1,weapon_ak47,weapon_famas,weapon_aug,weapon_glock,weapon_elite,weapon_frag,weapon_frag"
+        botweapons = "weapon_p228,weapon_m4a1,weapon_smokegrenade,weapon_m3,weapon_xm1014,weapon_m249,weapon_awp,weapon_mp5navy,weapon_ump45,weapon_sg550,weapon_tmp,weapon_deagle,weapon_scout,weapon_sg552,weapon_usp,weapon_mac10,weapon_galil,weapon_hegrenade,weapon_flashbang,weapon_fiveseven,weapon_p90,weapon_g3sg1,weapon_ak47,weapon_famas,weapon_aug,weapon_glock,weapon_elite,weapon_frag,weapon_frag"
         --botweapons = "weapon_csgo_ak47,weapon_csgo_awp,weapon_csgo_elite,weapon_csgo_m4a1,weapon_csgo_ssg08,weapon_csgo_m4a1_silencer,weapon_csgo_mp9,weapon_csgo_mp5sd,weapon_csgo_nova,weapon_csgo_sawedoff,weapon_csgo_bizon,weapon_csgo_deagle,weapon_csgo_g3sg1,weapon_csgo_p90,weapon_csgo_cz75a,weapon_csgo_p250,weapon_csgo_famas,weapon_csgo_glock,weapon_csgo_mp7,weapon_csgo_mag7,weapon_csgo_ump45,weapon_csgo_usp_silencer,weapon_csgo_xm1014,weapon_csgo_mac10,weapon_frag,weapon_frag"
     end
 
@@ -916,18 +939,22 @@ function LeadBot.StartCommand(bot, cmd)
     cmd:ClearMovement()
     cmd:SetButtons(buttons)
 
-
     if (!shouldmove) then 
         cmd:ClearButtons() 
         cmd:ClearMovement() 
+    end
+
+
+    if (GetConVar("leadbot_testcrazy"):GetBool()) then
+        cmd:SetButtons(IN_ATTACK)
     end
 end
 
 function LeadBot.PlayerMove(bot, cmd, mv)
     local shouldthink = !GetConVar("leadbot_stop"):GetBool()
-    local shouldmove = GetConVar("leadbot_move"):GetBool()
+    local shouldmove = GetConVar("leadbot_move"):GetBool() and !bot:IsFlagSet(FL_ATCONTROLS)
 
-    if (!shouldthink) then 
+    if (!shouldthink or bot:IsFlagSet(FL_FROZEN)) then 
         return 
     end
 
@@ -974,37 +1001,42 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     if !IsValid(controller.Target) then
         local possibleTargets = {}
 
+        local targettype = GetConVar("leadbot_targetting"):GetInt()
+        
+        if (targettype == 0) then
+            local viewrange = math.abs( GetConVar("leadbot_viewRange"):GetInt() )
 
-        -- NPC and player version of targetting (Uses and can eat a lot of FPS too than just targetting the players)
-        --[[
-        local _en = ents.FindInSphere( bot:GetPos(), 2048 )
-        for _, ply in ipairs(_en) do
-            if (IsValid(ply)) then
-                if (controller:CanSee(ply)) then
-                    if ((ply:IsPlayer() and (ply:Team() ~= bot:Team())) or (ply:IsNPC())) then
+            -- Only players (better for perfomance)
+            for _, ply in ipairs(player.GetAll()) do
+                --if ply ~= bot and ((ply:IsPlayer() and (!LeadBot.TeamPlay or (LeadBot.TeamPlay and (ply:Team() ~= bot:Team())))) or ply:IsNPC()) and ply:GetPos():DistToSqr(bot:GetPos()) < 2250000 then
+                if (ply ~= bot and ply:Team() ~= bot:Team() and !ply:IsFlagSet(FL_NOTARGET) and ply:GetPos():DistToSqr(bot:GetPos()) < viewrange) then
+                    --local targetpos = ply:EyePos() - Vector(0, 0, 10)
+                    --local trace = util.TraceLine({
+                        --start = bot:GetShootPos(),
+                        --endpos = targetpos,
+                        --filter = function(ent) return ent == ply end
+                    --})
+
+                    if (ply:Alive() and controller:CanSee(ply)) then
                         possibleTargets[#possibleTargets + 1] = ply
+
+                        --controller.Target = ply
+                        --controller.ForgetTarget = CurTime() + 2
                     end
                 end
             end
-        end
-        --]]
+        else
+            local viewrange = math.abs( GetConVar("leadbot_viewRangeSphere"):GetInt() )
 
-        -- Only players
-        for _, ply in ipairs(player.GetAll()) do
-            --if ply ~= bot and ((ply:IsPlayer() and (!LeadBot.TeamPlay or (LeadBot.TeamPlay and (ply:Team() ~= bot:Team())))) or ply:IsNPC()) and ply:GetPos():DistToSqr(bot:GetPos()) < 2250000 then
-            if (ply ~= bot and ply:Team() ~= bot:Team() and ply:GetPos():DistToSqr(bot:GetPos()) < 2250000) then
-                --local targetpos = ply:EyePos() - Vector(0, 0, 10)
-                --local trace = util.TraceLine({
-                    --start = bot:GetShootPos(),
-                    --endpos = targetpos,
-                    --filter = function(ent) return ent == ply end
-                --})
-
-                if (ply:Alive() and controller:CanSee(ply)) then
-                    possibleTargets[#possibleTargets + 1] = ply
-
-                    --controller.Target = ply
-                    --controller.ForgetTarget = CurTime() + 2
+            -- NPC and player version of targetting (Uses and can eat a lot of FPS too than just targetting the players)
+            local _en = ents.FindInSphere( bot:GetPos(), viewrange )
+            for _, ply in ipairs(_en) do
+                if (IsValid(ply)) then
+                    if (controller:CanSee(ply)) then
+                        if ((ply:IsPlayer() and (ply:Team() ~= bot:Team())) or (ply:IsNPC())) then
+                            possibleTargets[#possibleTargets + 1] = ply
+                        end
+                    end
                 end
             end
         end
@@ -1022,9 +1054,9 @@ function LeadBot.PlayerMove(bot, cmd, mv)
             controller.canSeeTarget = true
         end
     elseif controller.ForgetTarget < CurTime() and controller:CanSee(controller.Target) then
-        controller.ForgetTarget = CurTime() + 2.11
+        controller.ForgetTarget = CurTime() + 2.75
 
-        controller.canSeeTarget = false
+        controller.canSeeTarget = true
     end
 
     -- eyesight
@@ -1123,17 +1155,16 @@ function LeadBot.PlayerMove(bot, cmd, mv)
         math.sin(controller.FrameCounter / 4.11) * 8.12,
         math.sin(controller.FrameCounter / 6.75) * 0.75,
         math.cos(controller.FrameCounter / 8.23) * 3.23
-    )   
+    )aaa
     --]]
     controller.lookAngleExtra = Angle(
         math.sin(controller.FrameCounter / 35.11) * 0.52,
         math.sin(controller.FrameCounter / 35.75) * 0.45,
         math.cos(controller.FrameCounter / 35.23) * 0.33
-    )   
-
+    )  
 
     controller.FrameCounter = controller.FrameCounter + 1
-    if (controller.FrameCounter >= 100000) then
+    if controller.FrameCounter >= 100000 then
         controller.FrameCounter = 0
     end
 
@@ -1183,6 +1214,17 @@ function LeadBot.PlayerMove(bot, cmd, mv)
             local ang = LerpAngle(lerpc, bot:EyeAngles(), mva + controller.lookAngleExtra)
             bot:SetEyeAngles(Angle(ang.p, ang.y, 0))
         end
+
+        if (GetConVar("leadbot_testcrazy"):GetBool()) then
+
+            controller.lookAngleExtra = Vector(
+            math.random(0, 360),
+            math.random(0, 360),
+            math.random(0, 360)
+            )
+
+            controller.lookAngle = Angle( math.random(-40, 40), math.random(0, 360), math.random(0, 360) )
+        end
     else -- When has targets
         local ptv = controller.Target:EyePos()
 
@@ -1202,49 +1244,68 @@ function LeadBot.PlayerMove(bot, cmd, mv)
         --bot:SetEyeAngles(LerpAngle(lerp, bot:EyeAngles(), (ptv - bot:GetShootPos()):Angle() + controller.lookAngleExtra))
     end
 
+    local goalpos
     -- movement also has a similar issue, but it's more severe...
     if !controller.P then
-        return
-    end
+        --return
+        goalpos = bot:GetPos()
+    else
 
-    local segments = controller.P:GetAllSegments()
+        local segments = controller.P:GetAllSegments()
 
-    if !segments then return end
+        if !segments then return end
 
-    local cur_segment = controller.cur_segment
-    local curgoal = segments[cur_segment]
+        local cur_segment = controller.cur_segment
+        local curgoal = segments[cur_segment]
 
-    -- got nowhere to go, why keep moving?
-    if !curgoal then
-        mv:SetForwardSpeed(0)
+        -- got nowhere to go, why keep moving?
+        if !curgoal then
+            mv:SetForwardSpeed(0)
 
-        --[[
-        if (hastarget) then
-
-
-            -- Aim towards target
+            --[[
             if (hastarget) then
 
-                local ptv = controller.Target:EyePos()
 
-                mv:SetMoveAngles((ptv - bot:EyePos()):Angle())
+                -- Aim towards target
+                if (hastarget) then
 
-                ptv.z = ptv.z - 8
+                    local ptv = controller.Target:EyePos()
 
-                bot:SetEyeAngles(LerpAngle(lerp, bot:EyeAngles(), (ptv - bot:GetShootPos()):Angle()))
-            else
+                    mv:SetMoveAngles((ptv - bot:EyePos()):Angle())
+
+                    ptv.z = ptv.z - 8
+
+                    bot:SetEyeAngles(LerpAngle(lerp, bot:EyeAngles(), (ptv - bot:GetShootPos()):Angle()))
+                else
+            end
+            --]]
+           -- return
+
+           goalpos = bot:GetPos()
+        else
+            goalpos = curgoal.pos
+
+            -- Area
+            local area_att = curgoal.area:GetAttributes()
+
+            -- jump
+            if controller.NextJump ~= 0 and curgoal.type > 1 and controller.NextJump < CurTime() or area_att == NAV_MESH_JUMP then
+                controller.NextJump = 0
+            end
+
+            -- duck
+            if area_att == NAV_MESH_CROUCH then
+                controller.NextDuck = CurTime() + 0.1
+            end
+
         end
-        --]]
-        return
-    end
 
-    -- think every step of the way!
-    if segments[cur_segment + 1] and Vector(bot:GetPos().x, bot:GetPos().y, 0):DistToSqr(Vector(curgoal.pos.x, curgoal.pos.y)) < 100 then
-        controller.cur_segment = controller.cur_segment + 1
-        curgoal = segments[controller.cur_segment]
+        -- think every step of the way!
+        if segments[cur_segment + 1] and Vector(bot:GetPos().x, bot:GetPos().y, 0):DistToSqr(Vector(curgoal.pos.x, curgoal.pos.y)) < 100 then
+            controller.cur_segment = controller.cur_segment + 1
+            curgoal = segments[controller.cur_segment]
+        end
     end
-
-    local goalpos = curgoal.pos
 
     -- waaay too slow during gamplay
     --[[if bot:GetVelocity():Length2DSqr() <= 225 and controller.NextCenter == 0 and controller.NextCenter < CurTime() then
@@ -1280,19 +1341,6 @@ function LeadBot.PlayerMove(bot, cmd, mv)
         else
             mv:SetForwardSpeed(-1500)
         end
-    end
-
-    -- Area
-    local area_att = curgoal.area:GetAttributes()
-
-    -- jump
-    if controller.NextJump ~= 0 and curgoal.type > 1 and controller.NextJump < CurTime() or area_att == NAV_MESH_JUMP then
-        controller.NextJump = 0
-    end
-
-    -- duck
-    if area_att == NAV_MESH_CROUCH then
-        controller.NextDuck = CurTime() + 0.1
     end
 
     controller.goalPos = goalpos
