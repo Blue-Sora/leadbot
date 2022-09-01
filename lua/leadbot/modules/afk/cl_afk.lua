@@ -28,6 +28,7 @@ tp_Gamemodes["sandbox"] = true
 tp_Gamemodes["darkestdays"] = true
 NoAFKCamera["assassins"] = true
 NoAFKCamera["cavefight"] = true
+NoAFKCamera["fnafgm"] = true
 
 hook.Add("CreateMove", "LeadBot_AFK", function(cmd)
     local ply = LocalPlayer()
@@ -137,3 +138,30 @@ hook.Add("CalcViewModelView", "LeadBot_AFK", function(wep, vm, oldpos, oldang, n
 
     return newpos, ang
 end)
+
+
+local function DrawAFKText( ply )
+    if (!GetConVar("leadbot_displayAfkMessage"):GetBool()) then return end
+
+	if ( !IsValid( ply ) ) then return end 
+	if ( !ply:Alive() ) then return end -- Check if the player is alive 
+    if ( !ply:GetNWBool("LeadBot_AFK") ) then return end
+
+	local Distance = LocalPlayer():GetPos():Distance( ply:GetPos() ) --Get the distance between you and the player
+	
+	if ( Distance < 1000 ) then --If the distance is less than 1000 units, it will draw the name
+ 
+		local offset = Vector( 0, 0, 85 )
+		local ang = LocalPlayer():EyeAngles()
+		local pos = ply:GetPos() + offset + ang:Up()
+	 
+		ang:RotateAroundAxis( ang:Forward(), 90 )
+		ang:RotateAroundAxis( ang:Right(), 90 )
+	 
+		
+		cam.Start3D2D( pos, Angle( 0, ang.y, 90 ), 0.25 )
+			draw.DrawText( "[Currently AFK]", "HudSelectionText", 2, 2, team.GetColor(ply:Team()), TEXT_ALIGN_CENTER )
+		cam.End3D2D()
+	end
+end
+hook.Add( "PostPlayerDraw", "DrawAFKText", DrawAFKText )
