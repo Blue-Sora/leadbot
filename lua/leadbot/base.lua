@@ -1172,6 +1172,13 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     local shouldthink = !GetConVar("leadbot_stop"):GetBool()
     local shouldmove = GetConVar("leadbot_move"):GetBool() --and !bot:IsFlagSet(FL_ATCONTROLS)
 
+    if (!IsValid(controller)) then
+        bot.ControllerBot = ents.Create("leadbot_navigator")
+        bot.ControllerBot:Spawn()
+        bot.ControllerBot:SetOwner(bot)
+        controller = bot.ControllerBot
+    end
+
     if (!shouldthink or bot:IsFlagSet(FL_FROZEN) or bot:IsFlagSet(FL_ATCONTROLS)) then 
         return 
     end
@@ -1184,13 +1191,6 @@ function LeadBot.PlayerMove(bot, cmd, mv)
 
     if (IsValid(weapon)) then
         holdtype = weapon:GetHoldType()
-    end
-
-    if (!IsValid(controller)) then
-        bot.ControllerBot = ents.Create("leadbot_navigator")
-        bot.ControllerBot:Spawn()
-        bot.ControllerBot:SetOwner(bot)
-        controller = bot.ControllerBot
     end
 
     --[[local min, max = controller:GetModelBounds()
