@@ -10,11 +10,17 @@ LeadBot.Strategies = 1 -- how many strategies can the bot pick from
 LeadBot.NextBotNames = "Rodrigo gostosão,Killer Girl,José Pedro Henrique Lindo,Meu fone bugo,Eu sou muito lindo,Eu sou eu,Morreu kkkkkkkk,Pro playerzão,Miau miau,AAAA,Oi meu chapa,Niny,Bolsonera,ABCDEF,Eu sou muito ruim,Irei dar ragequit,Manteiga,Panelapin,0088,69,Aaaadoro,Miojo,Mingu,007,Adoro gritar"
 LeadBot.NextBotNamesPos = 0
 LeadBot.Gamemode = "sandbox"
---Leadbot.HL2_Weapons = {"weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_pistol", "weapon_crossbow", "weapon_ar2", "weapon_frag"}
+
+-- Writing this here so it'll check mounted known addons everytime a game is started.
+LeadBot.MountedAddons = {
+
+
+}
+--Leadbot.HL2_Weapons = {"weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_pistol", "weapon_crossbow", "weapon_ar2", "weapon_frag"} -- Unused anymore.
+--LeadBot.AllowHooks = false -- Unused anymore. Note that the usage of hooks in this was for my server so they would behave a bit different than what is typed here, and can also be used if wished to do some changes.
 
 --[[ COMMANDS ]]--
-
-concommand.Add("leadbot_add", function(ply, _, args) if IsValid(ply) and !ply:IsSuperAdmin() then return end local amount = 1 if tonumber(args[1]) then amount = tonumber(args[1]) end for i = 1, amount do timer.Simple(i * 0.1, function() LeadBot.AddBot() end) end end, nil, "Adds a LeadBot")
+concommand.Add("leadbot_add", function(ply, _, args) if IsValid(ply) and !ply:IsSuperAdmin() then return end local amount = 1 if tonumber(args[1]) then amount = tonumber(args[1]) end for i = 1, amount do timer.Simple(i * 0.1, function() LeadBot.AddBot(args[2]) end) end end, nil, "Adds a LeadBot")
 concommand.Add("leadbot_kick", function(ply, _, args) if !args[1] or IsValid(ply) and !ply:IsSuperAdmin() then return end if args[1] ~= "all" then for k, v in pairs(player.GetBots()) do if string.find(v:GetName(), args[1]) then v:Kick() return end end else for k, v in pairs(player.GetBots()) do v:Kick() end end end, nil, "Kicks LeadBots (all is avaliable!)")
 CreateConVar("leadbot_strategy", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Enables the strategy system for newly created bots.")
 CreateConVar("leadbot_names", "", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot names, seperated by commas.")
@@ -22,17 +28,20 @@ CreateConVar("leadbot_models", "", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot models, s
 CreateConVar("leadbot_name_prefix", "", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot name prefix")
 CreateConVar("leadbot_fov", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "LeadBot FOV\nSet to 0 to use the preset FOV.")
 
+-- New ConVars
 concommand.Add("leadbot_kill", function(ply, _, args) if !args[1] or IsValid(ply) and !ply:IsSuperAdmin() then return end if args[1] ~= "all" then for k, v in pairs(player.GetBots()) do if string.find(v:GetName(), args[1]) then v:Kill() return end end else for k, v in pairs(player.GetBots()) do v:Kill() end end end, nil, "Kill LeadBots (all is avaliable!)")
 CreateConVar("leadbot_stop", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stop bots from moving and thinking.")
-CreateConVar("leadbot_weapons", "_hl2", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot weapons able to use, seperated by commas. You can also leave it default with '_hl2' to make them select Half-life 2 weapons by default.")
-CreateConVar("leadbot_keepWeapon", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Forces your (and other net players) bot to keep a specified weapon without changing it to another. (Experimental)")
+CreateConVar("leadbot_weapons", "", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Bot weapons able to use, seperated by commas. You can also leave it default with '' to make them select Half-life 2 weapons by default.")
+CreateConVar("leadbot_keepWeapon", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Forces your (and other net players) bot to keep a specified weapon without changing it to another. (Experimental, not recommended to keep it on for now)")
 CreateConVar("leadbot_move", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from moving and shooting, they'll still think.")
 CreateConVar("leadbot_chat", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Stops bots from talking in chat. (Note: Disabling this will make them to also not be able to ask for help from their team or let them know about something if the gamemode you're playing has to do with teams.)")
-CreateConVar("leadbot_testcrazy", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "This was just a kinda of fun testing. Makes all bots go crazy into directions and shooting.\n(Reason: I've made this because I wanted to make the bots shoot randomly with the Nyan cat gun because yes.)")
-CreateConVar("leadbot_targetting", "0", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Way of targetting of the bots.\n0 = Targets only players.\n1 = Targets players and NPCs (Note: Makes the game not run in a good perfomance if there's a lot of bots running.)")
-CreateConVar("leadbot_viewRange", "2250000", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "(Default: 2250000) NOTE: This only works if the ConVar 'leadbot_targetting' is set to 0.\nRange for bots to detect and see enemies on their way in their FOV.")
-CreateConVar("leadbot_viewRangeSphere", "1020", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "(Default: 1020) NOTE: This only works if the ConVar 'leadbot_targetting' is set to 1.\nRange for bots to detect and see enemies on their way in their FOV inside a sphere of this range value.\nNOTE: Higher range values might cause a big hit on performance.")
+CreateConVar("leadbot_testcrazy", "0", {FCVAR_ARCHIVE}, "This was just a kinda of fun testing. Makes all bots go crazy into directions and shooting.\n(Reason: I've made this because I wanted to make the bots shoot randomly with the Nyan cat gun because yes.\nGive me a cookie to be able get the pass to use this too.)")
+CreateConVar("leadbot_targetting", "0", {FCVAR_ARCHIVE}, "Way of targetting of the bots.\n0 = Targets only players.\n1 = Targets players and NPCs (Note: Makes the game not run in a good perfomance if there's a lot of bots running (Usually 10 bots at max. depending on your hardware).)")
+CreateConVar("leadbot_viewRange", "2250000", {FCVAR_ARCHIVE}, "NOTE: This only works if the ConVar 'leadbot_targetting' is set to 0.\nRange for bots to detect and see enemies on their way in their FOV.")
+CreateConVar("leadbot_viewRangeSphere", "1020", {FCVAR_ARCHIVE}, "NOTE: This only works if the ConVar 'leadbot_targetting' is set to 1.\nRange for bots to detect and see enemies on their way in their FOV inside a sphere of this range value.\nNOTE: Higher range values might cause a big hit on performance.")
 CreateConVar("leadbot_displayAfkMessage", "1", {FCVAR_ARCHIVE, FCVAR_NOTIFY}, "Display if a player is currently AFK and controlled by a bot on top of their head.")
+CreateConVar("leadbot_stuckKill", "1", {FCVAR_ARCHIVE}, "If the bot can't find any nav to move, or any goals, or think it's stuck then kill themself.")
+CreateConVar("leadbot_stuckKillTimer", "4", {FCVAR_ARCHIVE}, "Timer (in seconds) to kill the bot when can't find any nav to move or think it's stuck from ConVar 'leadbot_noNavKillself'.")
 
 concommand.Add("leadbot_tp", 
 function(ply, _, args)
@@ -132,7 +141,7 @@ function(ply, _, args)
     return
 end
 , 
-nil, "Teleports all bots into your position.")
+nil, "Makes all bots goal into your position.")
 
 concommand.Add("leadbot_test", 
 function(ply, _, args)
@@ -179,6 +188,134 @@ function(ply, _, args)
 end
 , 
 nil, "Test function for when I was developing.")
+
+concommand.Add("leadbot_test2", 
+function(ply, _, args)
+
+    local ActiveWeapon = ply:GetActiveWeapon()
+
+    local HoldType = ActiveWeapon:GetHoldType()
+
+    print(ActiveWeapon)
+    print("Player '".. ply:Name() .."' hold weapon type: "..HoldType)
+
+    return
+end
+, 
+nil, "Test function for when I was developing.")
+    
+concommand.Add("leadbot_followMe", 
+function(ply, _, args)
+    local name = args[1]
+
+    if (!name or name == "") then return end
+
+    local IsFollow = name == "1"
+    local IsUnFollow = name == "0"
+    local IsAll = name == "all"
+
+    local IsSpecific = !IsFollow and !IsUnFollow and !IsAll
+
+
+    local DoFollow = function( bot, who )
+        local controller = bot.ControllerBot
+        local IsAlreadyFollowing = IsValid( controller.followingPlayer )
+
+        if ( IsAlreadyFollowing ) then who = nil end
+
+        controller.followingPlayer = who
+
+        if (!who) then
+            print(bot:Nick().." is no longer following.")
+        else
+
+            print(bot:Nick().." is now following "..who:Nick())
+        end
+
+    end
+
+    if (!IsAll) then
+
+        if (IsFollow) then
+            local hit = util.QuickTrace( ply:EyePos(), bot:GetForward() * 280, ply )
+            local entityw = hit.Entity
+
+            if (IsValid(entityw)) then
+                if ( entityw:IsPlayer() and entityw:IsLBot() ) then
+
+                    
+                    DoFollow( plybot, ply )
+                end
+            else
+            end
+        elseif IsSpecific then
+            for i, plybot in pairs( player.GetAll() ) do
+                
+                if (plybot:IsLBot()) then
+                    if plybot:Nick() == name then
+                        DoFollow( plybot, ply )
+                        break
+                    end
+                end
+
+            end
+        end
+    else
+
+
+        for i, plybot in pairs( player.GetAll() ) do
+
+            if (plybot:IsLBot()) then
+                DoFollow( plybot, ply )
+            end
+        end
+
+    end
+end
+, 
+nil, "Makes the bot current being pointed at follows you. \n'1' = Makes them follows you\n'0' = Stops them from following you\n'all' = Makes all bots following you stops from following or all of them starts following.\nYou can also specify the bot name instead to make them follow/unfollow you.")
+
+concommand.Add("leadbot_say", 
+function(ply, _, args)
+
+    local name = args[1]
+    local msg = args[2]
+    local onlyteam = args[3]
+
+    if !name then name = "all" end
+    if !msg then msg = "Hello world!" end
+    if !onlyteam then onlyteam = "0" end
+    onlyteam = onlyteam ~= "0"
+
+    name = string.lower( name )
+
+    if name == "all" then
+        for i, bot in pairs( player.GetAll() ) do
+            if bot:IsLBot() then
+
+                LeadBot.BotSay( bot, msg, onlyteam )
+            end
+        end
+    else
+        local foundbot
+        for i, bot in pairs( player.GetAll() ) do
+            if bot:IsLBot() then
+                if string.lower( bot:Name() ) == name then
+                    foundbot = bot
+                    break
+                end
+            end
+        end
+
+        if !foundbot then print("Couldn't find any bots named with the name of '"..name.."'") return end
+
+        LeadBot.BotSay( foundbot, msg, onlyteam )
+
+    end
+
+end
+, 
+nil, "Insert 'all' (I hope there's no player named 'all'...) to make all bots say in chat, or a specific bot name for a specific bot to say in chat.\nThat's an evil command to make them curse and make your friends in fear!- I mean friendly words y'know!\nThat also works to make bots follow each other if typing 'follow me (botname)', so evil!")
 
 --[[ FUNCTIONS ]]--
 
@@ -293,13 +430,15 @@ function reset_default_names()
     end
 end
 
-function LeadBot.AddBot()
+function LeadBot.AddBot(ForceBotJoin)
     if !FindMetaTable("NextBot").GetFOV then
         ErrorNoHalt("You must be using the dev version of Garry's mod!\nhttps://wiki.facepunch.com/gmod/Dev_Branch\n")
         return
     end
 
-    if !navmesh.IsLoaded() and !LeadBot.NoNavMesh then
+    if (!ForceBotJoin) then ForceBotJoin = "0" end
+
+    if !navmesh.IsLoaded() and !LeadBot.NoNavMesh and ForceBotJoin ~= "1" then
         ErrorNoHalt("There is no navmesh! Generate one using \"nav_generate\"!\n")
         return
     end
@@ -456,6 +595,13 @@ function LeadBot.AddBot()
     LeadBot.AddBotOverride(bot)
     LeadBot.AddBotControllerOverride(bot, bot.ControllerBot)
     MsgN("[LeadBot] Bot " .. name .. " with strategy " .. bot.BotStrategy .. " added!")
+
+    -- Killing them so their playemodel can be applied
+    local KillThem = true
+
+    if KillThem then
+        bot:Kill()
+    end
 end
 
 --[[ DEFAULT DM AI ]]--
@@ -479,37 +625,41 @@ function LeadBot.Think()
 
     for _, bot in pairs(player.GetAll()) do
         if (bot:IsLBot()) then
-            if (LeadBot.RespawnAllowed and bot.NextSpawnTime and !bot:Alive() and bot.NextSpawnTime < CurTime() and LeadBot.Gamemode == "sandbox" and math.random(1, 33) == 27) then
-                bot:Spawn()
+            if !hook.Run("LeadBot_OnBotThink", bot) then
+                if (LeadBot.RespawnAllowed and bot.NextSpawnTime and !bot:Alive() and bot.NextSpawnTime < CurTime() and LeadBot.Gamemode == "sandbox" and math.random(1, 33) == 27 or hook.Run("LeadBot_ForceBotSpawn", bot)) then
+                    if !hook.Run("LeadBot_CannotRespawn", bot) then
+                        bot:Spawn()
 
-                controller = bot.ControllerBot
+                        controller = bot.ControllerBot
 
 
-                -- Reset variables
-                controller.nextWeaponSwitch = 0
-                controller.forceWeaponChange = true
+                        -- Reset variables
+                        controller.nextWeaponSwitch = 0
+                        controller.forceWeaponChange = true
 
-                controller.Target = nil
+                        controller.Target = nil
 
-                -- Boolean
-                controller.IGuessWeAreAiming = false
+                        -- Boolean
+                        controller.IGuessWeAreAiming = false
 
-                -- Reset
-                controller:CReset()
+                        -- Reset
+                        controller:CReset()
 
-                -- Just to make it more likely a real player, let's also give it the physgun on respawn
-                bot:Give("weapon_physgun")
-                bot:Give("weapon_physcannon")
+                        -- Just to make it more likely a real player, let's also give it the physgun on respawn
+                        bot:Give("weapon_physgun")
+                        bot:Give("weapon_physcannon")
 
-                bot:SelectWeapon("weapon_physgun")
-                return
+                        bot:SelectWeapon("weapon_physgun")
+                        --return
+                    end
+                end
             end
 
-            local wep = bot:GetActiveWeapon()
-            if IsValid(wep) then
+            --local wep = bot:GetActiveWeapon()
+            --if IsValid(wep) then
                 --local ammoty = wep:GetPrimaryAmmoType() or wep.Primary.Ammo
                 --bot:SetAmmo(999, ammoty)
-            end
+            --end
         end
     end
 end
@@ -544,10 +694,16 @@ function LeadBot.StartCommand(bot, cmd)
 
     if !IsValid(controller) then return end
 
+    buttons = buttons + IN_FORWARD
+
     --if (GetConVar("leadbot_stop"):GetBool() or !bot:Alive() or bot:IsFlagSet(FL_FROZEN)) then
     if (GetConVar("leadbot_stop"):GetBool() or !bot:Alive() or bot:IsFlagSet(FL_FROZEN)) then
         cmd:ClearButtons()
         cmd:ClearMovement()
+
+
+        -- Write this so they won't sometime kill themself after reenabling their movement...
+        controller.NavTimerSinceCouldntFindNav = CurTime()
         return
     end
 
@@ -561,19 +717,23 @@ function LeadBot.StartCommand(bot, cmd)
         controller.nextWalkNormal = CurTime() + math.Rand(0.75, 26.5)
 
         if (math.random(1, 3) >= 2) then
-            controller.walkFast = false
+            controller.WalkType = 0
 
-            controller.walkNormalTimer = CurTime() + math.Rand(1.35, 11.1)
+            controller.startWalkingFastTimer = CurTime() + math.Rand(1.35, 11.1)
         end
     end
-    if (controller.walkNormalTimer < CurTime()) then
-        controller.walkFast = true
+    if (controller.startWalkingFastTimer < CurTime() and controller.startWalkingFastTimer ~= 0) then
+        controller.WalkType = LeadBot.choose( {1, 1, 1, 0, 2} )
+        controller.startWalkingFastTimer = 0
     end
 
-    if (controller.walkFast or IsValid(target)) then
+    if ( controller.WalkType == 1 or IsValid(target) ) then
         buttons = IN_SPEED
-    end
+    elseif ( controller.WalkType == 2 ) then
 
+        --buttons = buttons + IN_WALK
+        buttons = buttons + IN_WALK
+    end
 
    -- Weapon info
    local holdtype = ""
@@ -582,11 +742,11 @@ function LeadBot.StartCommand(bot, cmd)
         holdtype = botWeapon:GetHoldType()
    end
 
-   local ismelee = GetIsMelee(botWeapon)
+   local ismelee = LeadBot.GetIsMelee(botWeapon)
 
     -- Reload
     if (!ismelee) then
-        if (IsValid(botWeapon) and (botWeapon:Clip1() == 0 or !IsValid(target) and botWeapon:Clip1() <= botWeapon:GetMaxClip1() / 2)) then
+        if (IsValid(botWeapon) and (botWeapon:Clip1() <= 0 or !IsValid(target) and botWeapon:Clip1() <= botWeapon:GetMaxClip1() / 1.5)) then
             buttons = buttons + IN_RELOAD
         end
     end
@@ -656,7 +816,7 @@ function LeadBot.StartCommand(bot, cmd)
 
                         if (holdtype == "ar2") then
                             if (math.random(1, 95) >= 93) then
-                                buttons = buttons + IN_ATTACK2
+                                --buttons = buttons + IN_ATTACK2
                             end
                         end
                     end
@@ -728,7 +888,7 @@ function LeadBot.StartCommand(bot, cmd)
 
 
     -- Weapon physgun behaviour
-    if (isPhysgun) then
+    if (isPhysgun and botWeapon:GetClass() == "weapon_physcannon") then
         -- Look for objects if we don't have one.
         if (!IsValid(controller.Physgun_TargetProp)) then
 
@@ -834,12 +994,15 @@ function LeadBot.StartCommand(bot, cmd)
 
     -- Check interactive/destroyable objects on our path.
     local dt = util.QuickTrace(bot:EyePos(), bot:GetForward() * 45, bot)
+    local entpath = dt.Entity
 
-    if IsValid(dt.Entity) then
-        local class = dt.Entity:GetClass()
+    if IsValid(entpath) then
+        local class = entpath:GetClass()
 
 
         if (!IsValid(target)) then
+            local was = true
+
             if (class == "prop_physics" or class == "func_breakable_surf") then -- Destroy
                 if (!isPhysgun) then
                     -- Force use of melee to not waste ammo
@@ -850,17 +1013,67 @@ function LeadBot.StartCommand(bot, cmd)
 
                     buttons = buttons + IN_ATTACK
                 end
-            elseif (class == "prop_door_rotating" or class == "func_door_rotating") then -- Interact
+            elseif (class == "prop_door_rotating" or class == "func_door_rotating" or class == "func_door") or class == "func_button" then -- Interact
 
                 if (math.random(1, 24) == 14) then
                     buttons = buttons + IN_USE
                 end
 
                 controller.nextRandomLook = CurTime() + 1
+            else
+                was = false
+            end
+
+
+            if was then
+                controller.isLookingToDirection = true
+                controller.stopLookingTimer = CurTime() + 0.5
+
+                controller.lookAngle = ((entpath:GetPos()) - bot:EyePos()):Angle() + controller.lookAngleExtra
             end
         end
     end 
+    -------------------------------------------------------------------------------------------
+    -- Following player
+    local fplayer = controller.followingPlayer
+    local IsFollowingPlayer = IsValid( fplayer )
 
+    if IsFollowingPlayer then
+
+        if fplayer:InVehicle() then
+            local vehicle = fplayer:GetVehicle()
+            local inCar = bot:InVehicle() and bot:GetVehicle() == vehicle or false
+            local playerdistance = bot:GetPos():DistToSqr( vehicle:GetPos() )
+
+            -- Type of vehicles addon
+            local IsNotSimfphys = !(vehicle.vehiclebase and vehicle.vehiclebase.IsSimfphyscar)
+
+            if (!inCar) then
+                buttons = buttons + IN_USE
+
+
+                -- Seems like some scripted vehicles like from "simfphys" bots aren't able sometimes to get in, even if you force them to,
+                -- unless if you're on the passenger seat so they do get in but in the driver seat.
+                -- Maybe there might be a specific method to make players get in their vehicles that I might not know so we could see if it's a simfphys vehicle and use it
+                -- to make them get in... tested with Scars vehicle addon and works fine. Let's see if I'm able to figure this out later.
+                -- EDIT: Nevermind, seems like it was literally it.
+                
+
+                -- If we are close enough but not able to join we can force it to...
+                if (playerdistance <= 6200) then
+                    if !IsNotSimfphys then
+                        vehicle.vehiclebase:Use( bot )
+                    else
+                        bot:EnterVehicle( vehicle )
+                    end
+                end
+            else
+
+            end
+        elseif bot:InVehicle() then
+            bot:ExitVehicle()
+        end
+    end
 
     -------------------------------------------------------------------------------------------
     -- Selecting weapons behaviour
@@ -868,10 +1081,15 @@ function LeadBot.StartCommand(bot, cmd)
     -- Timer to switch weapons
     --local weaponlist = {"weapon_smg1", "weapon_357", "weapon_shotgun", "weapon_pistol", "weapon_crossbow", "weapon_ar2", "weapon_frag"}
 
-    if (botweapons == "_hl2") then
+    if (botweapons == "") then
         botweapons = "weapon_smg1,weapon_357,weapon_shotgun,weapon_pistol,weapon_crossbow,weapon_ar2,weapon_frag"
-        botweapons = "weapon_p228,weapon_m4a1,weapon_smokegrenade,weapon_m3,weapon_xm1014,weapon_m249,weapon_awp,weapon_mp5navy,weapon_ump45,weapon_sg550,weapon_tmp,weapon_deagle,weapon_scout,weapon_sg552,weapon_usp,weapon_mac10,weapon_galil,weapon_hegrenade,weapon_flashbang,weapon_fiveseven,weapon_p90,weapon_g3sg1,weapon_ak47,weapon_famas,weapon_aug,weapon_glock,weapon_elite,weapon_frag,weapon_frag"
+    end
+
+    -- This is was actually wrote for my server but will still be leaving this here. (Some are Counter-Strike: Source, CSGO and lowpoly TFA weapons.)
+    if (botweapons == "soratest") then
+        botweapons = "weapon_p228,weapon_m4a1,weapon_smokegrenade,weapon_m3,weapon_xm1014,weapon_m249,weapon_awp,weapon_mp5navy,weapon_ump45,weapon_sg550,weapon_tmp,weapon_deagle,weapon_scout,weapon_sg552,weapon_usp,weapon_mac10,weapon_galil,weapon_hegrenade,weapon_fiveseven,weapon_p90,weapon_g3sg1,weapon_ak47,weapon_famas,weapon_aug,weapon_glock,weapon_elite,weapon_frag,weapon_frag"
         --botweapons = "weapon_csgo_ak47,weapon_csgo_awp,weapon_csgo_elite,weapon_csgo_m4a1,weapon_csgo_ssg08,weapon_csgo_m4a1_silencer,weapon_csgo_mp9,weapon_csgo_mp5sd,weapon_csgo_nova,weapon_csgo_sawedoff,weapon_csgo_bizon,weapon_csgo_deagle,weapon_csgo_g3sg1,weapon_csgo_p90,weapon_csgo_cz75a,weapon_csgo_p250,weapon_csgo_famas,weapon_csgo_glock,weapon_csgo_mp7,weapon_csgo_mag7,weapon_csgo_ump45,weapon_csgo_usp_silencer,weapon_csgo_xm1014,weapon_csgo_mac10,weapon_frag,weapon_frag"
+        --botweapons = "lowpoly_svd,lowpoly_deagle,lowpoly_mp5,lowpoly_m1014,lowpoly_ar15,lowpoly_ump45,lowpoly_vector,lowpoly_g18,lowpoly_mp7,lowpoly_spas12,lowpoly_scarh,lowpoly_m1911,lowpoly_m82a3,lowpoly_ak74,lowpoly_g36c,lowpoly_uzi,weapon_frag,weapon_frag"
     end
 
     --if (botweapons ~= "_hl2") then -- Custom weapons
@@ -881,7 +1099,7 @@ function LeadBot.StartCommand(bot, cmd)
 
     if (IsValid(botWeapon)) then
         if (botWeapon:GetClass() == "weapon_physgun") then
-            --controller.nextWeaponSwitch = 0
+            controller.nextWeaponSwitch = 0
         end
     end
 
@@ -952,9 +1170,9 @@ end
 
 function LeadBot.PlayerMove(bot, cmd, mv)
     local shouldthink = !GetConVar("leadbot_stop"):GetBool()
-    local shouldmove = GetConVar("leadbot_move"):GetBool() and !bot:IsFlagSet(FL_ATCONTROLS)
+    local shouldmove = GetConVar("leadbot_move"):GetBool() --and !bot:IsFlagSet(FL_ATCONTROLS)
 
-    if (!shouldthink or bot:IsFlagSet(FL_FROZEN)) then 
+    if (!shouldthink or bot:IsFlagSet(FL_FROZEN) or bot:IsFlagSet(FL_ATCONTROLS)) then 
         return 
     end
 
@@ -994,7 +1212,7 @@ function LeadBot.PlayerMove(bot, cmd, mv)
 
     mv:SetForwardSpeed(1200)
 
-    if (!IsValid(controller.Target) or controller.ForgetTarget < CurTime() or controller.Target:Health() <= 0)  then
+    if (!IsValid(controller.Target) or controller.ForgetTarget < CurTime() or controller.Target:Health() <= 0) then
         controller.Target = nil
     end
 
@@ -1017,15 +1235,16 @@ function LeadBot.PlayerMove(bot, cmd, mv)
                         --filter = function(ent) return ent == ply end
                     --})
 
-                    if (ply:Alive() and controller:CanSee(ply)) then
-                        possibleTargets[#possibleTargets + 1] = ply
-
+                    if (ply:Health() > 0 and controller:CanSee(ply)) then
+                        if (!hook.Run("LeadBot_OnBotTargetCondition", bot, ply)) then
+                            possibleTargets[#possibleTargets + 1] = ply
+                        end
                         --controller.Target = ply
                         --controller.ForgetTarget = CurTime() + 2
                     end
                 end
             end
-        else
+        elseif targettype == 1 then
             local viewrange = math.abs( GetConVar("leadbot_viewRangeSphere"):GetInt() )
 
             -- NPC and player version of targetting (Uses and can eat a lot of FPS too than just targetting the players)
@@ -1033,8 +1252,10 @@ function LeadBot.PlayerMove(bot, cmd, mv)
             for _, ply in ipairs(_en) do
                 if (IsValid(ply)) then
                     if (controller:CanSee(ply)) then
-                        if ((ply:IsPlayer() and (ply:Team() ~= bot:Team())) or (ply:IsNPC())) then
-                            possibleTargets[#possibleTargets + 1] = ply
+                        if ((ply:IsPlayer() and ply:Team() ~= bot:Team()) or (ply:IsNPC())) then
+                            if (!hook.Run("LeadBot_OnBotTargetCondition", bot, ply)) then
+                                possibleTargets[#possibleTargets + 1] = ply
+                            end
                         end
                     end
                 end
@@ -1053,10 +1274,14 @@ function LeadBot.PlayerMove(bot, cmd, mv)
 
             controller.canSeeTarget = true
         end
-    elseif controller.ForgetTarget < CurTime() and controller:CanSee(controller.Target) then
+    elseif controller.ForgetTarget > CurTime() and controller:CanSee(controller.Target) then
         controller.ForgetTarget = CurTime() + 2.75
 
         controller.canSeeTarget = true
+
+        if hook.Run("LeadBot_OnBotTargetThink", bot, controller.Target) then
+            controller:CLooseTarget()
+        end
     end
 
     -- eyesight
@@ -1081,27 +1306,103 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     local target = controller.Target
     local hastarget = IsValid(target)
     local targetignore = controller.IgnoreTarget
-    if targetignore then hastarget = false end
+    if targetignore then print("bwar") hastarget = false end
 
     if (shouldmove) then
-        if (!hastarget and (!controller.PosGen or bot:GetPos():DistToSqr(controller.PosGen) < 1000 or controller.LastSegmented < CurTime())) then
-            -- find a random spot on the map, and in 10 seconds do it again!
-            --local navs = navmesh.Find(bot:GetPos(), 185341, 1000, 1000)
-            
-            --if (#navs > 0) then
-                --local navpicked = math.random(1, #navs)
+        local IsFollowingPlayer = IsValid( controller.followingPlayer )
 
-                --controller.PosGen = navs [ navpicked ]:GetCenter()
-            -- controller.LastSegmented = CurTime() + 10
-            --end
 
-            controller.PosGen = controller:FindSpot("random", {pos = bot:GetPos(), radius = 8311, stepup = 400, stepdown = 2100})
-            --controller.PosGen = controller:FindSpot("random", {pos = bot:GetPos(), radius = 92311, stepup = 1000, stepdown = 1000})
-            --controller.PosGen = controller:FindSpot("random", {pos = bot:GetPos(), radius = 72311})
-            
-            controller.LastSegmented = CurTime() + 10
+
+        if (!hastarget) then
+            if (!IsFollowingPlayer) then
+                if (!controller.PosGen or bot:GetPos():DistToSqr(controller.PosGen) < 1000 or controller.LastSegmented < CurTime()) then
+                    -- find a random spot on the map, and in 10 seconds do it again!
+                    --local navs = navmesh.Find(bot:GetPos(), 185341, 1000, 1000)
+                    
+                    --if (#navs > 0) then
+                        --local navpicked = math.random(1, #navs)
+
+                        --controller.PosGen = navs [ navpicked ]:GetCenter()
+                    -- controller.LastSegmented = CurTime() + 10
+                    --end
+
+                    controller.PosGen = controller:FindSpot("random", {pos = bot:GetPos(), radius = 8311, stepup = 400, stepdown = 2100})
+                    --controller.PosGen = controller:FindSpot("random", {pos = bot:GetPos(), radius = 92311, stepup = 1000, stepdown = 1000})
+                    --controller.PosGen = controller:FindSpot("random", {pos = bot:GetPos(), radius = 72311})
+                
+
+                    controller.LastSegmented = CurTime() + 10
+                end
+            else
+                local distance = controller.followingPlayerDistance
+                local fplayer = controller.followingPlayer
+
+                local playerdistance = bot:GetPos():DistToSqr( fplayer:GetPos() )
+
+                -- If the player we are following is on a vehicle... try our best to get into too
+                if fplayer:InVehicle() then
+                    local vehicle = fplayer:GetVehicle()
+                    local inCar = bot:InVehicle() and bot:GetVehicle() == vehicle or false
+
+                    if (!inCar) then
+                        -- Set it to 0 so we'll try to get closer to it to get into!
+                        distance = 0
+
+                        -- Force our view into the vehicle
+                        controller.isLookingToDirection = true
+                        controller.lookAngle = (( vehicle:GetPos() + Vector(0, 0, 20)) - bot:GetShootPos()):Angle() + controller.lookAngleExtra
+                        controller.stopLookingTimer = CurTime() + 0.5
+                    else
+
+
+                    end
+                end
+
+                -- Check distance from player and where we should stop when close enough
+                if playerdistance > distance then
+
+                    controller:CSetGoal( fplayer:GetPos() )
+
+                    if playerdistance < distance * 1.15 then
+                        controller.WalkType = 2
+                    elseif playerdistance > distance * 11.43 then
+                        controller.WalkType = 1
+                    elseif playerdistance > distance * 1.25 then
+                        controller.WalkType = 0
+                    end
+                else
+                    shouldmove = false
+
+                    -- Keep them looking into the direction they are randomly looking.
+                    controller.isLookingToDirection = true
+                    controller.stopLookingTimer = CurTime() + 0.5
+                end
+
+                -- Check the state of the player we are following...
+                if ( !fplayer:Alive() ) then
+                    LeadBot.BotSay( bot, "Since you're dead "..fplayer:Nick()..", I'll stop following.", true, 0.25 )
+                    controller:FollowStop( fplayer )
+                elseif fplayer:IsLBot() then
+
+                    -- Check if they are bot (it's okay to follow a bot.)
+                    -- but let's make sure them are not following us while we are following them. (That's kinda funny ngl.)
+                    local fcontroller = fplayer.ControllerBot
+
+                    -- Funnily enough, they are!
+                    if fcontroller.followingPlayer == bot then
+
+                        -- Make them stops following us ( I guess since this function is executed by order the bot who comes first in the order will always makes their follower stops. )
+                        fcontroller:FollowStop()
+
+                        -- Now let's write some funny comments.
+                        LeadBot.BotSay( bot, "Hey "..fplayer:Name()..", why are you following me while I'm following YOU!?", true, 0.5 )
+                        LeadBot.BotSay( fplayer, "My bad "..bot:Name()..", I didn't noticed that, you can follow me then.", true, 1.5 )
+                    end
+                    
+                end
+            end
         elseif (hastarget) then
-            if (!GetIsMelee(weapon)) then
+            if (!LeadBot.GetIsMelee(weapon)) then
                 local gooddistance = 90000
                 local sniperdistance = 87333 -- Distance to not make the sniper try to aim and kill
 
@@ -1109,7 +1410,10 @@ function LeadBot.PlayerMove(bot, cmd, mv)
 
                 -- move to our target
                 local distance = target:GetPos():DistToSqr( bot:GetPos() )
-                controller.PosGen = target:GetPos()
+
+                --local near = navmesh.GetNearestNavArea( target:GetPos(), false, 10000, false, true, -2)
+
+                controller.PosGen = target:GetPos() + Vector(0, 0, 4)
 
                 -- back up if the target is really close
                 -- TODO: find a random spot rather than trying to back up into what could just be a wall
@@ -1132,7 +1436,7 @@ function LeadBot.PlayerMove(bot, cmd, mv)
 
                 local pos = target:GetPos()
 
-                pos.z = pos.z - 20
+                pos.z = pos.z + 20
 
                 -- move to our target
                 controller.PosGen = pos
@@ -1171,7 +1475,7 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     -- When has no targets
     local mva = controller.movingAngle
     if (!hastarget) then
-
+        
         -- Random looking into a direction
         if (controller.nextRandomLook < CurTime()) then
             
@@ -1228,7 +1532,6 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     else -- When has targets
         local ptv = controller.Target:EyePos()
 
-
         ptv.z = ptv.z - 8
 
         --local dist = controller.viewVpos
@@ -1245,18 +1548,46 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     end
 
     local goalpos
+
+    if (shouldmove) then
+        if GetConVar("leadbot_stuckKill"):GetBool() then
+            local TimerM = GetConVar("leadbot_stuckKillTimer"):GetInt()
+
+            if CurTime() - TimerM >= controller.NavTimerSinceCouldntFindNav then
+                controller.NavTimerSinceCouldntFindNavTimerToKill = controller.NavTimerSinceCouldntFindNavTimerToKill + 1
+                if ( controller.NavTimerSinceCouldntFindNavTimerToKill >= 2 ) then
+                    bot:Kill()
+
+
+                    -- Give us a message
+                    print(bot:Name().." killed themself because couldn't find a goal or was probably stuck.", false)
+                    
+                    -- Bot message
+                    LeadBot.BotSay(bot, "Killed myself because I couldn't goal or was stuck.", false)
+                end
+            end
+        end
+    end
+
     -- movement also has a similar issue, but it's more severe...
-    if !controller.P then
+    if !controller.P or !shouldmove then
         --return
         goalpos = bot:GetPos()
     else
 
         local segments = controller.P:GetAllSegments()
 
-        if !segments then return end
+        if !segments then 
+            return 
+        end
+        
 
         local cur_segment = controller.cur_segment
         local curgoal = segments[cur_segment]
+
+        -- Resets timer till it couldn't find any nav.
+        controller.NavTimerSinceCouldntFindNav = CurTime()
+        controller.NavTimerSinceCouldntFindNavTimerToKill = 0
 
         -- got nowhere to go, why keep moving?
         if !curgoal then
@@ -1320,16 +1651,18 @@ function LeadBot.PlayerMove(bot, cmd, mv)
         controller.NextCenter = 0
     end]]
 
-    if bot:GetVelocity():Length2DSqr() <= 225 then
-        if controller.NextCenter < CurTime() then
-            controller.strafeAngle = ((controller.strafeAngle == 1 and 2) or 1)
-            --controller.NextCenter = CurTime() + math.Rand(0.3, 0.65)
-            controller.NextCenter = CurTime() + math.Rand(0.2, 0.31)
-        elseif controller.nextStuckJump < CurTime() then
-            if !bot:Crouching() then
-                controller.NextJump = 0
+    if shouldmove then
+        if bot:GetVelocity():Length2DSqr() <= 225 then
+            if controller.NextCenter < CurTime() then
+                controller.strafeAngle = ((controller.strafeAngle == 1 and 2) or 1)
+                --controller.NextCenter = CurTime() + math.Rand(0.3, 0.65)
+                controller.NextCenter = CurTime() + math.Rand(0.2, 0.31)
+            elseif controller.nextStuckJump < CurTime() then
+                if !bot:Crouching() then
+                    controller.NextJump = 0
+                end
+                controller.nextStuckJump = CurTime() + math.Rand(1, 2)
             end
-            controller.nextStuckJump = CurTime() + math.Rand(1, 2)
         end
     end
 
@@ -1435,28 +1768,39 @@ function LeadBot.PlayerMove(bot, cmd, mv)
     --]]
 end
 
-function GetIsMelee(wp)
+function LeadBot.GetIsMelee(wp)
     if !IsValid(wp) then
-
         return false
-
     end
 
     local holdtype = wp:GetHoldType()
-    return holdtype == "melee" or holdtype == "knife" or holdtype == "fist" or holdtype == "melee2"
+    return holdtype == "melee" or holdtype == "knife" or holdtype == "fist" or holdtype == "melee2" or holdtype == "normal"
 end
 
-function BotSay(ply, msg, onlyTeam)
-    if (!GetConVar("leadbot_chat"):GetBool()) then return end
-    if (onlyTeam == nil) then onlyTeam = true end
+function LeadBot.BotSay(ply, msg, onlyTeam, timerSecs)
+    if (!GetConVar("leadbot_chat"):GetBool() and !ply.ControllerBot.AllowedToChat) then return end
+    if (!onlyTeam) then onlyTeam = false else onlyTeam = true end
+    if (!timerSecs) then timerSecs = 0.1 end
 
-
-    ply:Say(msg, onlyTeam)
+    local controller = ply.ControllerBot
+    timer.Simple( timerSecs, function() ply:Say(msg, onlyTeam); controller.ChatIsTyping = false; end )
 
     return true
 end
-function BotSwitchWeapons(ply, wp)
+function LeadBot.BotSwitchWeapons(ply, wp)
 
+    if (!IsValid(wp)) then return end
+
+    ply:SelectWeapon(wp)
+
+
+    -- TODO: Write some variables about the weapon and tell how to use a few of them to the bot...
+
+end
+
+function LeadBot.choose(Table)
+
+    return Table[ math.random( 1, #Table ) ]
 
 end
 
@@ -1477,13 +1821,17 @@ end)
 
 hook.Add("SetupMove", "LeadBot_Control", function(bot, mv, cmd)
     if bot:IsLBot() then
-        LeadBot.PlayerMove(bot, cmd, mv)
+        if !hook.Run("LeadBot_OnBotMove", bot, mv, cmd) then
+            LeadBot.PlayerMove(bot, cmd, mv)
+        end
     end
 end)
 
 hook.Add("StartCommand", "LeadBot_Control", function(bot, cmd)
     if bot:IsLBot() then
-        LeadBot.StartCommand(bot, cmd)
+        if !hook.Run("LeadBot_OnBotStartCommand", bot, cmd) then
+            LeadBot.StartCommand(bot, cmd)
+        end
     end
 end)
 
@@ -1510,6 +1858,79 @@ end)
 hook.Add("PlayerSpawn", "LeadBot_Spawn", function(bot)
     if bot:IsLBot() then
         LeadBot.PlayerSpawn(bot)
+    end
+end)
+
+hook.Add("PlayerSay", "LeadBot_PlayerSay", function( ply, msg, IsTeam )
+
+    if !GetConVar("leadbot_chat"):GetBool() then print("nope!") return end
+
+    -- Do not allow AFK players to execute these
+    local execute = !ply:GetNWBool("LeadBot_AFK")
+
+    if execute then
+        local msgSplit = string.Split(msg, " ")
+        local msgSize = #msgSplit
+        local controller
+        local func
+
+        local IsAlive = ply:Alive() -- We might want to use one of these with the player being alive...?
+        
+
+        ------------------------------------------------
+        -- Commands
+        ------------------------------------------------
+        if msgSize >= 3 then
+            for i, splitmsg in pairs( msgSplit ) do
+                msgSplit[ i ] = string.lower( splitmsg )
+            end
+
+            if msgSplit[ 1 ] == "follow" and msgSplit[ 2 ] == "me" then
+                --msgSplit[3] = string.lower( msgSplit[3] )
+
+                local name = ""
+
+                local i = 3
+
+                local attempts = 1000
+
+                -- Not really safe but let's use it 
+                while(i <= msgSize) do
+                    attempts = attempts - 1
+                    if attempts <= 0 then PrintMessage("LeadBot: We got into an infinite loop during our process!!!") end
+
+                    -- Stops from adding space at the start of the name...
+                    if (i == 3) then
+                        name = name .. msgSplit[ i ]
+                    else
+                        name = name .. " " .. msgSplit[ i ]
+                    end
+
+                    i = i + 1
+                end
+
+                print(name)
+
+                for i, bot in pairs( player.GetAll() ) do
+                    if name == string.lower( bot:Name() ) and bot:IsLBot() then
+                        controller = bot.ControllerBot
+
+                        if !IsTeam or IsTeam and bot:Team() == ply:Team() then
+                            controller:FollowTarget( ply, false )
+
+                            if ( controller:IsFollowingPlayer() ) then
+                                LeadBot.BotSay( bot, "Alright, I'm following!", IsTeam )
+                            else
+                                LeadBot.BotSay( bot, "Okay, I'm not following anymore.", IsTeam )
+                            end
+                        end
+
+                        break
+                    end
+                end
+            end
+        end
+    else
     end
 end)
 
